@@ -15,7 +15,7 @@ endif()
 option(FLATBUFFERS_BUILD_TESTS "Enable the build of tests and samples." NOT_EMSCRIPTEN)
 option(FLATBUFFERS_INSTALL "Enable the installation of targets." ON)
 option(FLATBUFFERS_BUILD_FLATLIB "Enable the build of the flatbuffers library"
-       ON)
+       NOT_EMSCRIPTEN)
 option(FLATBUFFERS_BUILD_FLATC "Enable the build of the flatbuffers compiler"
        ON)
 option(FLATBUFFERS_BUILD_FLATHASH "Enable the build of flathash" ON)
@@ -161,7 +161,7 @@ set(FlatBuffers_GRPCTest_SRCS
 # source_group(Tests FILES ${FlatBuffers_Tests_SRCS})
 
 if(EMSCRIPTEN)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Os -s WASM=1")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Werror -Wextra -Wno-unused-parameter")
   set(FLATBUFFERS_PRIVATE_CXX_FLAGS "-Wold-style-cast")
   if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.8)
