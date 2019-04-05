@@ -7,7 +7,12 @@ project(FlatBuffers)
 
 # NOTE: Code coverage only works on Linux & OSX.
 option(FLATBUFFERS_CODE_COVERAGE "Enable the code coverage build option." OFF)
-option(FLATBUFFERS_BUILD_TESTS "Enable the build of tests and samples." ON)
+if (EMSCRIPTEN)
+  set(NOT_EMSCRIPTEN OFF)
+else()
+  set(NOT_EMSCRIPTEN ON)
+endif()
+option(FLATBUFFERS_BUILD_TESTS "Enable the build of tests and samples." NOT_EMSCRIPTEN)
 option(FLATBUFFERS_INSTALL "Enable the installation of targets." ON)
 option(FLATBUFFERS_BUILD_FLATLIB "Enable the build of the flatbuffers library"
        ON)
@@ -155,7 +160,18 @@ set(FlatBuffers_GRPCTest_SRCS
 # source_group(Compiler FILES ${FlatBuffers_Compiler_SRCS})
 # source_group(Tests FILES ${FlatBuffers_Tests_SRCS})
 
-if(EXISTS "${CMAKE_TOOLCHAIN_FILE}")
+if(EMSCRIPTEN)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Werror -Wextra -Wno-unused-parameter")
+  set(FLATBUFFERS_PRIVATE_CXX_FLAGS "-Wold-style-cast")
+  if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.8)
+    list(APPEND FLATBUFFERS_PRIVATE_CXX_FLAGS "-Wimplicit-fallthrough" "-Wextra-semi" "-Werror=unused-private-field") # enable warning
+  endif()
+
+  # Certain platforms such as ARM do not use signed chars by default
+  # which causes issues with certain bounds checks.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsigned-char")
+elseif(EXISTS "${CMAKE_TOOLCHAIN_FILE}")
   # do not apply any global settings if the toolchain
   # is being configured externally
   message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
