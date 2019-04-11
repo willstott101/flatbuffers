@@ -7,15 +7,10 @@ project(FlatBuffers)
 
 # NOTE: Code coverage only works on Linux & OSX.
 option(FLATBUFFERS_CODE_COVERAGE "Enable the code coverage build option." OFF)
-if (EMSCRIPTEN)
-  set(NOT_EMSCRIPTEN OFF)
-else()
-  set(NOT_EMSCRIPTEN ON)
-endif()
-option(FLATBUFFERS_BUILD_TESTS "Enable the build of tests and samples." NOT_EMSCRIPTEN)
+option(FLATBUFFERS_BUILD_TESTS "Enable the build of tests and samples." ON)
 option(FLATBUFFERS_INSTALL "Enable the installation of targets." ON)
 option(FLATBUFFERS_BUILD_FLATLIB "Enable the build of the flatbuffers library"
-       NOT_EMSCRIPTEN)
+       ON)
 option(FLATBUFFERS_BUILD_FLATC "Enable the build of the flatbuffers compiler"
        ON)
 option(FLATBUFFERS_BUILD_FLATHASH "Enable the build of flathash" ON)
@@ -273,7 +268,7 @@ endif()
 include_directories(include)
 include_directories(grpc)
 
-if(FLATBUFFERS_BUILD_FLATLIB)
+if(NOT EMSCRIPTEN AND FLATBUFFERS_BUILD_FLATLIB)
   add_library(flatbuffers STATIC ${FlatBuffers_Library_SRCS})
   # CMake > 2.8.11: Attach header directory for when build via add_subdirectory().
   target_include_directories(flatbuffers INTERFACE
@@ -338,7 +333,7 @@ function(compile_flatbuffers_schema_to_binary SRC_FBS)
     DEPENDS flatc)
 endfunction()
 
-if(FLATBUFFERS_BUILD_TESTS)
+if(NOT EMSCRIPTEN AND FLATBUFFERS_BUILD_TESTS)
   compile_flatbuffers_schema_to_cpp(tests/monster_test.fbs)
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/tests)
   add_executable(flattests ${FlatBuffers_Tests_SRCS})
